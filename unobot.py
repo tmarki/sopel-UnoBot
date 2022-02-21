@@ -941,10 +941,10 @@ def unodeal(bot, trigger):
 def unoplay(bot, trigger):
     bot.memory['UnoBot'].play(bot, trigger)
 
-@module.rule('^[rgbyw][0-9rgbyd]{1,3}$')
-@module.priority('medium')
+@module.rule('^[rgbyw][0-9rgbyds]{1,3}$')
+@module.priority('low')
 @module.require_chanmsg
-def unoplay(bot, trigger):
+def unoplayshort(bot, trigger):
     bot.memory['UnoBot'].play(bot, trigger)
 
 @module.commands('draw')
