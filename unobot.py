@@ -221,7 +221,13 @@ class UnoGame:
             return
 
         try:
-            color, card = trigger.group(3).upper(), trigger.group(4).upper()  # raises AttributeError if either missing
+            if len(trigger.groups()) > 1:
+                color, card = trigger.group(3).upper(), trigger.group(4).upper()  # raises AttributeError if either missing
+            else:
+                if trigger.group(0).upper()[0] != 'W':
+                    color, card = trigger.group(0)[:1].upper(), trigger.group(0)[1:].upper()
+                else:
+                    color, card = trigger.group(0)[:-1].upper(), trigger.group(0)[-1:].upper()
 
             # some gymnastics to support both '.play r d2' and '.play d2 r'
             if color not in CARD_COLORS:
@@ -932,6 +938,11 @@ def unodeal(bot, trigger):
 def unoplay(bot, trigger):
     bot.memory['UnoBot'].play(bot, trigger)
 
+@module.rule('^[rgbyw][0-9rgbyds]{1,3}$')
+@module.priority('low')
+@module.require_chanmsg
+def unoplayshort(bot, trigger):
+    bot.memory['UnoBot'].play(bot, trigger)
 
 @module.commands('draw')
 @module.priority('medium')
