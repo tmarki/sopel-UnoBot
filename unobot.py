@@ -78,7 +78,7 @@ STRINGS = {
     'YOUR_CARDS':      "Your cards (%d): %s",
     'NEXT_START':      "Next: ",
     'SB_START':        "Standings: ",
-    'SB_PLAYER':       "%s (%d %s)",
+    'SB_PLAYER':       "%s (%d)",
     'D2':              "%s draws two and is skipped!",
     'CARDS':           "Cards: %s",
     'WD4':             "%s draws four and is skipped!",
@@ -321,10 +321,9 @@ class UnoGame:
         with lock:
             pl = self.playerOrder[self.currentPlayer]
             bot.say(STRINGS['TOP_CARD'] % (pl, self.render_cards(bot, [self.topCard], pl)))
-            self.send_cards(bot, self.playerOrder[self.currentPlayer])
-            self.send_next(bot)
+            self.send_cards(bot, self.playerOrder[self.currentPlayer], True)
 
-    def send_cards(self, bot, who):
+    def send_cards(self, bot, who, withNext=False):
         with lock:
             if not self.startTime:
                 bot.notice(STRINGS['NOT_STARTED'], who)
@@ -333,11 +332,10 @@ class UnoGame:
                 bot.notice(STRINGS['NOT_PLAYING'], who)
                 return
             cards = self.players[who]
-            bot.notice(STRINGS['YOUR_CARDS'] % (len(cards), self.render_cards(bot, cards, who)), who)
-
-    def send_next(self, bot):
-        with lock:
-            bot.notice(STRINGS['NEXT_START'] + self.render_counts(), self.playerOrder[self.currentPlayer])
+            msg = STRINGS['YOUR_CARDS'] % (len(cards), self.render_cards(bot, cards, who))
+            if withNext:
+                msg += " - " + STRINGS['NEXT_START'] + self.render_counts()
+            bot.notice(msg, who)
 
     def send_counts(self, bot):
         if self.startTime:
@@ -362,8 +360,7 @@ class UnoGame:
             arr = []
             while plr != stop:
                 cards = len(self.players[self.playerOrder[plr]])
-                g_cards = "card" if cards == 1 else "cards"
-                arr.append(STRINGS['SB_PLAYER'] % (self.playerOrder[plr], cards, g_cards))
+                arr.append(STRINGS['SB_PLAYER'] % (self.playerOrder[plr], cards))
                 plr += inc
                 if plr == len(self.players) and not full:
                     plr = 0
