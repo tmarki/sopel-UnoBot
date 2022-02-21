@@ -73,7 +73,7 @@ STRINGS = {
     'NO_SCORES':       "No scores yet",
     'YOUR_RANK':       "%s is ranked #%d in UNO, having accumulated %d %s from %d %s.",
     'NOT_RANKED':      "%s hasn't finished an UNO game, and thus has no rank yet.",
-    'SCORE_ROW':       "#%s %s (%d %s in %d %s (%d won), %s wasted)",
+    'SCORE_ROW':       "#%s %s (%d %s in %d %s (%d won), %s wasted, %.3f pts/sec, %.1f pts/game)",
     'TOP_CARD':        "%s's turn. Top Card: %s",
     'YOUR_CARDS':      "Your cards (%d): %s",
     'NEXT_START':      "Next: ",
@@ -84,7 +84,7 @@ STRINGS = {
     'WD4':             "%s draws four and is skipped!",
     'SKIPPED':         "%s is skipped!",
     'REVERSED':        "Order reversed!",
-    'GAINS':           "%s gains %s %s!",
+    'GAINS':           "%s gains %s %s (%.3f pts/sec)!",
     'PLAYER_QUIT':     "Removing %s (player #%d) from the current UNO game.",
     'PLAYER_KICK':     "Kicking %s (player #%d) from the game at %s's request.",
     'OWNER_LEFT':      "Game owner left! New owner: %s",
@@ -687,7 +687,9 @@ class UnoBot:
                 g_games = "game" if scores[player]['games'] == 1 else "games"
                 bot.say(STRINGS['SCORE_ROW'] %
                         (i, player, scores[player]['points'], g_points, scores[player]['games'], g_games,
-                         scores[player]['wins'], timedelta(seconds=int(scores[player]['playtime']))))
+                         scores[player]['wins'], timedelta(seconds=int(scores[player]['playtime'])),
+                         scores[player]['points'] / float(scores[player]['playtime']),
+                         scores[player]['points'] / float(scores[player]['games'])))
                 i += 1
         else:
             player = str(trigger.group(3) or trigger.nick)
@@ -715,9 +717,10 @@ class UnoBot:
                             score += self.special_scores[c[1:]]
                         else:
                             score += int(c[1])
-                bot.say(STRINGS['GAINS'] % (winner, score, 'point' if score == 1 else 'points'))
-                self.update_scores(bot, game.players.keys(), winner, score,
-                                   (datetime.now() - game.startTime).seconds)
+                elapsed = (datetime.now() - game.startTime).seconds
+                bot.say(STRINGS['GAINS'] % (winner, score, 'point' if score == 1 else 'points',
+                    score / float(elapsed)))
+                self.update_scores(bot, game.players.keys(), winner, score, elapsed)
             except Exception as e:
                 bot.say("UNO score error: %s" % e)
             del self.games[trigger.sender]
