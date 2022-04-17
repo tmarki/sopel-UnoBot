@@ -73,7 +73,7 @@ STRINGS = {
     'NO_SCORES':       "No scores yet",
     'YOUR_RANK':       "%s is ranked #%d in UNO, having accumulated %d %s from %d %s.",
     'NOT_RANKED':      "%s hasn't finished an UNO game, and thus has no rank yet.",
-    'SCORE_ROW':       "#%s %s (%d %s in %d %s (%d won), %s wasted, %.3f pts/sec, %.1f pts/game)",
+    'SCORE_ROW':       "#%s %s (%d %s in %d %s (%d won), %s wasted, %.3f pts/sec, %.1f pts/game, %.1f pts/won)",
     'TOP_CARD':        "%s's turn. Top Card: %s",
     'YOUR_CARDS':      "Your cards (%d): %s",
     'NEXT_START':      "Next: ",
@@ -688,11 +688,15 @@ class UnoBot:
                     break  # nobody else has any points; stop printing
                 g_points = "point" if scores[player]['points'] == 1 else "points"
                 g_games = "game" if scores[player]['games'] == 1 else "games"
+                ptsperwin = 0.0
+                if scores[player]['wins']:
+                    ptsperwin = scores[player]['points'] / float(scores[player]['wins'])
                 bot.say(STRINGS['SCORE_ROW'] %
                         (i, player, scores[player]['points'], g_points, scores[player]['games'], g_games,
                          scores[player]['wins'], timedelta(seconds=int(scores[player]['playtime'])),
                          scores[player]['points'] / float(scores[player]['playtime']),
-                         scores[player]['points'] / float(scores[player]['games'])))
+                         scores[player]['points'] / float(scores[player]['games']),
+                         ptsperwin))
                 i += 1
         else:
             player = str(trigger.group(3) or trigger.nick)
